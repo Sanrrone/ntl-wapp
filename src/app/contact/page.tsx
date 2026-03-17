@@ -47,14 +47,16 @@ export default function ContactPage() {
       }),
     });
 
-    const text = await response.text();
+	const text = await response.text();
+	console.log("Apps Script raw response:", text);
 
-    let result: { success?: boolean; message?: string } = {};
-    try {
-      result = JSON.parse(text);
-    } catch {
-      result = { success: false, message: text || "Unexpected server response" };
-    }
+	let result: { success?: boolean; message?: string; recipient?: string; quota?: number } = {};
+	try {
+	  result = JSON.parse(text);
+	  console.log("Apps Script parsed response:", result);
+	} catch {
+	  result = { success: false, message: text || "Unexpected server response" };
+	}
 
     if (!response.ok || !result.success) {
       throw new Error(result.message || "Google Apps Script submission failed");
