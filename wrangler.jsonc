@@ -1,19 +1,15 @@
-/**
- * For more details on how to configure Wrangler, refer to:
- * https://developers.cloudflare.com/workers/wrangler/configuration/
- */
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "ntl-wapp",
-	"main": ".open-next/worker.js",
-	"compatibility_date": "2025-10-08",
-	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
-	"assets": {
-		"binding": "ASSETS",
-		"directory": ".open-next/assets"
-	},
-	"observability": {
-		"enabled": true
-	},
-	"upload_source_maps": true
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "nordic-tiempo-lento",
+  "compatibility_date": "2026-03-17",
+  "send_email": [
+    {
+      "name": "CONTACT_SEND",
+      "destination_address": "info@nordictiempolento.com"
+    }
+  ],
+  "vars": {
+    "CONTACT_EMAIL": "info@nordictiempolento.com",
+    "CONTACT_SENDER": "noreply@nordictiempolento.com"
+  }
 }
