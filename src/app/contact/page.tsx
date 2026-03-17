@@ -28,29 +28,32 @@ export default function ContactPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const submitWithGoogleScript = async () => {
-    const response = await fetch(CONTACT_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8",
-      },
-      body: JSON.stringify({
-        name: formData.name,
-        email: formData.email,
-        subject: formData.subject,
-        message: formData.message,
-        company: formData.company,
-      }),
-    });
+const submitWithGoogleScript = async () => {
+  const response = await fetch(CONTACT_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8",
+    },
+    body: JSON.stringify({
+      name: formData.name,
+      email: formData.email,
+      subject: formData.subject,
+      message: formData.message,
+      company: formData.company,
+    }),
+  });
 
-    const result = await response.json();
-
-    if (!response.ok || !result.success) {
-      throw new Error(result?.message || "Google Apps Script submission failed");
-    }
-
-    return result;
+  const result = (await response.json()) as {
+    success?: boolean;
+    message?: string;
   };
+
+  if (!response.ok || !result.success) {
+    throw new Error(result.message || "Google Apps Script submission failed");
+  }
+
+  return result;
+};
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
