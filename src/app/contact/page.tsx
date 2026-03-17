@@ -5,11 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 
 type ContactProvider = "web3forms" | "cloudflare" | "google";
 
+const CONTACT_PROVIDER: ContactProvider =
+  (process.env.NEXT_PUBLIC_CONTACT_PROVIDER as ContactProvider) || "google";
+
 const CONTACT_ENDPOINT =
   process.env.NEXT_PUBLIC_CONTACT_ENDPOINT ||
   "https://script.google.com/macros/s/AKfycbwhztCDjYKdaPvwhXpJnKZwxX-tUrvTfFh1BbHqtb7gPjYPU2AuWgYlPdgJmIh6QmZtCg/exec";
-
-const CONTACT_ENDPOINT = process.env.NEXT_PUBLIC_CONTACT_ENDPOINT || "";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -29,36 +30,36 @@ export default function ContactPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-const submitWithGoogleScript = async () => {
-  const response = await fetch(CONTACT_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8",
-    },
-    body: JSON.stringify({
-      name: formData.name,
-      email: formData.email,
-      subject: formData.subject,
-      message: formData.message,
-      company: formData.company,
-    }),
-  });
+  const submitWithGoogleScript = async () => {
+    const response = await fetch(CONTACT_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8",
+      },
+      body: JSON.stringify({
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+        company: formData.company,
+      }),
+    });
 
-  const text = await response.text();
+    const text = await response.text();
 
-  let result: { success?: boolean; message?: string } = {};
-  try {
-    result = JSON.parse(text);
-  } catch {
-    result = { success: false, message: text || "Unexpected server response" };
-  }
+    let result: { success?: boolean; message?: string } = {};
+    try {
+      result = JSON.parse(text);
+    } catch {
+      result = { success: false, message: text || "Unexpected server response" };
+    }
 
-  if (!response.ok || !result.success) {
-    throw new Error(result.message || "Google Apps Script submission failed");
-  }
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Google Apps Script submission failed");
+    }
 
-  return result;
-};
+    return result;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,6 +109,47 @@ const submitWithGoogleScript = async () => {
               interested in learning more about our gut-skin axis platform, we
               would love to hear from you.
             </p>
+          </div>
+
+          <div className="flex flex-col gap-6 mt-4 border-t border-gray-200 pt-8">
+            <div className="flex flex-col gap-1">
+              <span className="text-[#B98A45] font-semibold text-sm uppercase tracking-wider">
+                Email Us
+              </span>
+              <a
+                href="mailto:info@nordictiempolento.com"
+                className="text-[#111C18] text-xl font-medium hover:text-[#8B0000] transition-colors"
+              >
+                info@nordictiempolento.com
+              </a>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <span className="text-[#B98A45] font-semibold text-sm uppercase tracking-wider">
+                Headquarters
+              </span>
+              <span className="text-[#111C18] text-xl font-medium leading-relaxed">
+                Keskuskatu 16 A 49
+                <br />
+                11100 RIIHIMÄKI
+                <br />
+                Finland
+              </span>
+            </div>
+
+            <div className="w-full h-48 md:h-64 mt-2 rounded-[1.5rem] overflow-hidden shadow-sm border border-gray-200">
+              <iframe
+                width="100%"
+                height="100%"
+                frameBorder="0"
+                scrolling="no"
+                marginHeight={0}
+                marginWidth={0}
+                src="https://maps.google.com/maps?q=Keskuskatu%2016%20A%2049%2C%2011100%20Riihim%C3%A4ki%2C%20Finland&t=&z=14&ie=UTF8&iwloc=&output=embed"
+                title="Nordic Tiempo Lento Location"
+                className="w-full h-full"
+              />
+            </div>
           </div>
         </motion.div>
 
@@ -231,7 +273,8 @@ const submitWithGoogleScript = async () => {
                 >
                   <h3 className="text-2xl font-bold text-[#111C18]">Message Sent!</h3>
                   <p className="text-[#5A5A5A] max-w-sm">
-                    Thank you for reaching out to Nordic Tiempo Lento. We have received your inquiry and will be in touch shortly.
+                    Thank you for reaching out to Nordic Tiempo Lento. We have
+                    received your inquiry and will be in touch shortly.
                   </p>
                   <button
                     onClick={() => setIsSubmitted(false)}
