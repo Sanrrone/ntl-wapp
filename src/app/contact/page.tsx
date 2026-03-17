@@ -5,8 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 
 type ContactProvider = "web3forms" | "cloudflare" | "google";
 
-const CONTACT_PROVIDER =
-  (process.env.NEXT_PUBLIC_CONTACT_PROVIDER as ContactProvider) || "google";
+const CONTACT_ENDPOINT =
+  process.env.NEXT_PUBLIC_CONTACT_ENDPOINT ||
+  "https://script.google.com/macros/s/AKfycbwhztCDjYKdaPvwhXpJnKZwxX-tUrvTfFh1BbHqtb7gPjYPU2AuWgYlPdgJmIh6QmZtCg/exec";
 
 const CONTACT_ENDPOINT = process.env.NEXT_PUBLIC_CONTACT_ENDPOINT || "";
 
@@ -43,10 +44,14 @@ const submitWithGoogleScript = async () => {
     }),
   });
 
-  const result = (await response.json()) as {
-    success?: boolean;
-    message?: string;
-  };
+  const text = await response.text();
+
+  let result: { success?: boolean; message?: string } = {};
+  try {
+    result = JSON.parse(text);
+  } catch {
+    result = { success: false, message: text || "Unexpected server response" };
+  }
 
   if (!response.ok || !result.success) {
     throw new Error(result.message || "Google Apps Script submission failed");
