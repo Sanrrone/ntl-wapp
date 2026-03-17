@@ -13,6 +13,8 @@
 	},
 	"dependencies": {
 		"@opennextjs/cloudflare": "1.14.0",
+		"framer": "^3.0.4",
+		"mimetext": "^3.0.28",
 		"next": "16.0.7",
 		"react": "19.2.1",
 		"react-dom": "19.2.1"
