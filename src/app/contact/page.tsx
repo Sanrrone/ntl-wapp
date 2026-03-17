@@ -3,14 +3,12 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-type ContactProvider = "web3forms" | "cloudflare" | "google";
+type ContactProvider = "google";
 
 const CONTACT_PROVIDER: ContactProvider =
   (process.env.NEXT_PUBLIC_CONTACT_PROVIDER as ContactProvider) || "google";
 
-const CONTACT_ENDPOINT =
-  process.env.NEXT_PUBLIC_CONTACT_ENDPOINT ||
-  "https://script.google.com/macros/s/AKfycbxF95x44y-P1d3VoVNW2kAcYUgVFgGgJMEWrhbOF3jg_cL8yxURVZcldDiY_6nYLV5NJw/exec";
+const CONTACT_ENDPOINT = process.env.NEXT_PUBLIC_CONTACT_ENDPOINT;
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
