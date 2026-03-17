@@ -10,7 +10,7 @@ const CONTACT_PROVIDER: ContactProvider =
 
 const CONTACT_ENDPOINT =
   process.env.NEXT_PUBLIC_CONTACT_ENDPOINT ||
-  "https://script.google.com/macros/s/AKfycbwhztCDjYKdaPvwhXpJnKZwxX-tUrvTfFh1BbHqtb7gPjYPU2AuWgYlPdgJmIh6QmZtCg/exec";
+  "https://script.google.com/macros/s/AKfycbxF95x44y-P1d3VoVNW2kAcYUgVFgGgJMEWrhbOF3jg_cL8yxURVZcldDiY_6nYLV5NJw/exec";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
