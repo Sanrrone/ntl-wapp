@@ -8,7 +8,7 @@ type ContactProvider = "google";
 const CONTACT_PROVIDER: ContactProvider =
   (process.env.NEXT_PUBLIC_CONTACT_PROVIDER as ContactProvider) || "google";
 
-const CONTACT_ENDPOINT = process.env.NEXT_PUBLIC_CONTACT_ENDPOINT;
+const CONTACT_ENDPOINT = process.env.NEXT_PUBLIC_CONTACT_ENDPOINT ?? "";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -29,6 +29,10 @@ export default function ContactPage() {
   };
 
   const submitWithGoogleScript = async () => {
+    if (!CONTACT_ENDPOINT) {
+      throw new Error("Missing NEXT_PUBLIC_CONTACT_ENDPOINT");
+    }
+
     const response = await fetch(CONTACT_ENDPOINT, {
       method: "POST",
       headers: {
