@@ -3,16 +3,12 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-type ContactProvider = "web3forms" | "cloudflare";
+type ContactProvider = "web3forms" | "cloudflare" | "google";
 
 const CONTACT_PROVIDER =
-  (process.env.NEXT_PUBLIC_CONTACT_PROVIDER as ContactProvider) || "cloudflare";
+  (process.env.NEXT_PUBLIC_CONTACT_PROVIDER as ContactProvider) || "google";
 
-const CLOUDFLARE_CONTACT_ENDPOINT =
-  process.env.NEXT_PUBLIC_CONTACT_ENDPOINT || "/api/contact";
-
-const WEB3FORMS_ENDPOINT = "https://api.web3forms.com/submit";
-const WEB3FORMS_ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY || "";
+const CONTACT_ENDPOINT = process.env.NEXT_PUBLIC_CONTACT_ENDPOINT || "";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -20,6 +16,7 @@ export default function ContactPage() {
     email: "",
     subject: "",
     message: "",
+    company: "",
   });
 
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -31,53 +28,25 @@ export default function ContactPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const submitWithWeb3Forms = async () => {
-    if (!WEB3FORMS_ACCESS_KEY) {
-      throw new Error("Missing NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY");
-    }
-
-    const response = await fetch(WEB3FORMS_ENDPOINT, {
+  const submitWithGoogleScript = async () => {
+    const response = await fetch(CONTACT_ENDPOINT, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
+        "Content-Type": "text/plain;charset=utf-8",
       },
       body: JSON.stringify({
-        access_key: WEB3FORMS_ACCESS_KEY,
         name: formData.name,
         email: formData.email,
         subject: formData.subject,
         message: formData.message,
+        company: formData.company,
       }),
     });
 
     const result = await response.json();
 
     if (!response.ok || !result.success) {
-      throw new Error(result?.message || "Web3Forms submission failed");
-    }
-
-    return result;
-  };
-
-  const submitWithCloudflare = async () => {
-    const response = await fetch(CLOUDFLARE_CONTACT_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: formData.name,
-        email: formData.email,
-        subject: formData.subject,
-        message: formData.message,
-      }),
-    });
-
-    const result = await response.json().catch(() => ({}));
-
-    if (!response.ok || !result.success) {
-      throw new Error(result?.message || "Cloudflare submission failed");
+      throw new Error(result?.message || "Google Apps Script submission failed");
     }
 
     return result;
@@ -88,10 +57,10 @@ export default function ContactPage() {
     setIsSubmitting(true);
 
     try {
-      if (CONTACT_PROVIDER === "web3forms") {
-        await submitWithWeb3Forms();
+      if (CONTACT_PROVIDER === "google") {
+        await submitWithGoogleScript();
       } else {
-        await submitWithCloudflare();
+        throw new Error("Unsupported contact provider");
       }
 
       setIsSubmitted(true);
@@ -100,6 +69,7 @@ export default function ContactPage() {
         email: "",
         subject: "",
         message: "",
+        company: "",
       });
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -131,47 +101,6 @@ export default function ContactPage() {
               would love to hear from you.
             </p>
           </div>
-
-          <div className="flex flex-col gap-6 mt-4 border-t border-gray-200 pt-8">
-            <div className="flex flex-col gap-1">
-              <span className="text-[#B98A45] font-semibold text-sm uppercase tracking-wider">
-                Email Us
-              </span>
-              <a
-                href="mailto:info@nordictiempolento.com"
-                className="text-[#111C18] text-xl font-medium hover:text-[#8B0000] transition-colors"
-              >
-                info@nordictiempolento.com
-              </a>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <span className="text-[#B98A45] font-semibold text-sm uppercase tracking-wider">
-                Headquarters
-              </span>
-              <span className="text-[#111C18] text-xl font-medium leading-relaxed">
-                Keskuskatu 16 A 49
-                <br />
-                11100 RIIHIMÄKI
-                <br />
-                Finland
-              </span>
-            </div>
-
-            <div className="w-full h-48 md:h-64 mt-2 rounded-[1.5rem] overflow-hidden shadow-sm border border-gray-200">
-              <iframe
-                width="100%"
-                height="100%"
-                frameBorder="0"
-                scrolling="no"
-                marginHeight={0}
-                marginWidth={0}
-                src="https://maps.google.com/maps?q=Keskuskatu%2016%20A%2049%2C%2011100%20Riihim%C3%A4ki%2C%20Finland&t=&z=14&ie=UTF8&iwloc=&output=embed"
-                title="Nordic Tiempo Lento Location"
-                className="w-full h-full"
-              />
-            </div>
-          </div>
         </motion.div>
 
         <motion.div
@@ -192,11 +121,18 @@ export default function ContactPage() {
                   onSubmit={handleSubmit}
                   className="w-full flex flex-col gap-6"
                 >
+                  <input
+                    type="text"
+                    name="company"
+                    value={formData.company}
+                    onChange={handleChange}
+                    tabIndex={-1}
+                    autoComplete="off"
+                    className="hidden"
+                  />
+
                   <div className="flex flex-col gap-2">
-                    <label
-                      htmlFor="name"
-                      className="text-sm font-semibold text-[#111C18]"
-                    >
+                    <label htmlFor="name" className="text-sm font-semibold text-[#111C18]">
                       Full Name
                     </label>
                     <input
@@ -212,10 +148,7 @@ export default function ContactPage() {
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <label
-                      htmlFor="email"
-                      className="text-sm font-semibold text-[#111C18]"
-                    >
+                    <label htmlFor="email" className="text-sm font-semibold text-[#111C18]">
                       Email Address
                     </label>
                     <input
@@ -231,10 +164,7 @@ export default function ContactPage() {
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <label
-                      htmlFor="subject"
-                      className="text-sm font-semibold text-[#111C18]"
-                    >
+                    <label htmlFor="subject" className="text-sm font-semibold text-[#111C18]">
                       Topic of Inquiry
                     </label>
                     <select
@@ -249,19 +179,14 @@ export default function ContactPage() {
                         Select a topic...
                       </option>
                       <option value="Investment">Investment & Fundraising</option>
-                      <option value="Partnership">
-                        Scientific / Clinical Partnership
-                      </option>
+                      <option value="Partnership">Scientific / Clinical Partnership</option>
                       <option value="Press">Press & Media</option>
                       <option value="General">General Inquiry</option>
                     </select>
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <label
-                      htmlFor="message"
-                      className="text-sm font-semibold text-[#111C18]"
-                    >
+                    <label htmlFor="message" className="text-sm font-semibold text-[#111C18]">
                       Message
                     </label>
                     <textarea
@@ -296,28 +221,9 @@ export default function ContactPage() {
                   transition={{ duration: 0.4 }}
                   className="w-full flex flex-col items-center justify-center text-center gap-4 py-12"
                 >
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-2">
-                    <svg
-                      className="w-8 h-8 text-green-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  </div>
-                  <h3 className="text-2xl font-bold text-[#111C18]">
-                    Message Sent!
-                  </h3>
+                  <h3 className="text-2xl font-bold text-[#111C18]">Message Sent!</h3>
                   <p className="text-[#5A5A5A] max-w-sm">
-                    Thank you for reaching out to Nordic Tiempo Lento. We have
-                    received your inquiry and will be in touch shortly.
+                    Thank you for reaching out to Nordic Tiempo Lento. We have received your inquiry and will be in touch shortly.
                   </p>
                   <button
                     onClick={() => setIsSubmitted(false)}
